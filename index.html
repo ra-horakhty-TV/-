@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>MHXX 護石フレーム検索 iPhone版</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg:#07101e; --card:#101a2d; --card2:#15223a; --line:#2a3d61;
+  --text:#f4f7ff; --muted:#a8b6d1; --accent:#38bdf8; --accent2:#7dd3fc;
+  --ok:#86efac; --err:#fda4af; --warn:#fde68a; --selected:#173b56;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; min-height:100vh; background:linear-gradient(180deg,#07101e,#0b1323 45%,#07101e);
+  color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic UI","Noto Sans JP",system-ui,sans-serif;
+}
+main{max-width:920px;margin:auto;padding:20px 14px calc(38px + env(safe-area-inset-bottom))}
+h1{font-size:clamp(24px,7vw,36px);line-height:1.2;margin:4px 0 8px}
+.lead{margin:0 0 16px;color:var(--muted);line-height:1.65;font-size:14px}
+.card{background:rgba(16,26,45,.97);border:1px solid var(--line);border-radius:18px;padding:15px;margin:13px 0;box-shadow:0 12px 30px #0004}
+.searchrow{display:grid;grid-template-columns:1fr auto;gap:9px}
+input,select,button{font:inherit;font-size:16px}
+input,select{width:100%;min-height:48px;border:1px solid #40577e;background:#091425;color:var(--text);border-radius:12px;padding:11px 12px;outline:none}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px #38bdf822}
+button{min-height:46px;border:1px solid #40577e;background:#152440;color:var(--text);border-radius:12px;padding:9px 14px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:active{transform:translateY(1px)}
+button.primary{background:#0ea5e9;color:#03131f;border-color:#67e8f9;min-width:92px}
+button.danger{background:#3a1822;border-color:#7f3242;color:#fecdd3}
+button:disabled{opacity:.45}
+.hint{font-size:12px;color:var(--muted);line-height:1.6;margin-top:9px}
+.examples{display:flex;gap:7px;overflow:auto;padding:9px 0 1px;scrollbar-width:none}
+.examples::-webkit-scrollbar{display:none}
+.examples button{white-space:nowrap;min-height:38px;font-size:13px;padding:7px 10px}
+.status{margin-top:11px;border:1px solid #273b60;background:#091425;border-radius:12px;padding:10px 11px;color:var(--muted);font-size:13px;line-height:1.5}
+.status.ok{color:var(--ok)} .status.err{color:var(--err)} .status.warn{color:var(--warn)}
+.progress{height:5px;background:#16243e;border-radius:999px;overflow:hidden;margin-top:8px;display:none}
+.progress>i{display:block;height:100%;width:0;background:var(--accent);transition:width .12s linear}
+details{margin-top:11px}
+summary{color:#c7d5ee;cursor:pointer;padding:4px 0}
+.settings{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:9px;margin-top:9px}
+label{display:block;color:var(--muted);font-size:11px;margin:0 0 5px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.titleline{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+h2{font-size:18px;margin:0}
+.badge{color:var(--muted);font-size:12px;border:1px solid var(--line);padding:5px 9px;border-radius:999px;white-space:nowrap}
+.empty{border:1px dashed #34486d;border-radius:13px;padding:20px 12px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6}
+.frames{display:flex;flex-wrap:wrap;gap:8px}
+.frame{min-height:43px;background:#0c2a3d;border-color:#287294;color:#bae6fd;font-variant-numeric:tabular-nums}
+.frame.active{background:#155e75;border-color:#67e8f9;color:white}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:13px;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;min-width:560px}
+th,td{padding:9px 10px;border-bottom:1px solid #253654;text-align:left;font-size:13px;vertical-align:middle}
+th{background:#16233b;color:#c9d5e9;position:sticky;top:0;z-index:1;font-size:11px}
+td:first-child{font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+tr.center{background:var(--selected)}
+.charm{font-weight:700}
+.subnote{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+dialog{width:min(760px,94vw);max-height:82vh;border:1px solid var(--line);border-radius:16px;background:#0d1729;color:var(--text);padding:0}
+dialog::backdrop{background:#020617cc}
+.dhead{position:sticky;top:0;background:#0d1729;border-bottom:1px solid var(--line);padding:12px;z-index:2}
+.dheadrow{display:flex;gap:8px}
+.skillgrid{padding:12px;display:flex;flex-wrap:wrap;gap:7px}
+.skillgrid button{font-size:13px;min-height:38px;padding:7px 10px}
+.notice{border-left:3px solid var(--warn);padding-left:10px;color:#d7cfa6;font-size:12px;line-height:1.6;margin-top:13px}
+footer{font-size:11px;color:#8292ad;line-height:1.7;margin:18px 3px 0}
+@media(max-width:620px){
+ .searchrow{grid-template-columns:1fr}
+ .searchrow .primary{width:100%;min-height:50px}
+ .settings{grid-template-columns:1fr 1fr}
+}
+@media(max-width:390px){.settings{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+  <h1>MHXX 護石フレーム検索</h1>
+  <p class="lead">iPhone向け・外部Pythonなし。<b>風化したお守り</b>を、<b>マカ錬金 / 炭鉱（通常クエスト）</b>の生成方式を切り替えて逆引きします。</p>
+
+  <section class="card">
+    <div class="searchrow">
+      <input id="query" autocomplete="off" autocapitalize="off" spellcheck="false"
+        placeholder="痛撃達人6103 / 連撃4 痛撃5 S3" aria-label="護石を1行で入力">
+      <button id="search" class="primary">検索</button>
+    </div>
+    <div class="hint">
+      例: <b>痛撃達人6103</b> ＝ 痛撃6・達人10・S3 ／ <b>連撃4 痛撃5 S3</b><br>
+      空白なしでもOK。範囲も書けます: <b>痛撃6 達人10 S3 @0-500000</b>
+    </div>
+    <div class="examples">
+      <button data-q="痛達6103 @296260-296260">痛達</button>
+      <button data-q="貫達5103 @2359514-2359514">貫達</button>
+      <button data-q="痛会653 @4351902-4351902">痛会</button>
+      <button data-q="納反1073 @7158398-7158398">納反</button>
+      <button data-q="炎会753 @7638553-7638553">炎会</button>
+      <button data-q="連攻5103 @9673507-9673507">連攻</button>
+      <button id="skillsBtn">スキル一覧</button>
+    </div>
+
+    <details>
+      <summary>検索設定</summary>
+      <div class="settings">
+        <div><label>開始フレーム</label><input id="startF" type="number" min="0" step="1" value="0"></div>
+        <div><label>終了フレーム（このFまで）</label><input id="endF" type="number" min="0" step="1" value="50000000"></div>
+        <div><label>生成方式</label><select id="origin"><option value="maka">マカ錬金</option><option value="mine">炭鉱（通常クエスト）</option></select></div>
+        <div><label>条件</label><select id="mode"><option value="exact">完全一致</option><option value="greater">指定値以上</option></select></div>
+      </div>
+      <div class="hint">「以上」はスキル値を指定値以上で検索します。スロット数は入力値以上になります。炭鉱では第2スキルの正負判定が入り、マイナス値も生成されます。</div>
+    </details>
+
+    <div id="status" class="status">初期化中…</div>
+    <div class="progress" id="progress"><i id="bar"></i></div>
+    <div class="toolbar"><button id="cancel" class="danger" style="display:none">検索を中止</button></div>
+  </section>
+
+  <section class="card">
+    <div class="titleline"><h2>検索結果</h2><span id="count" class="badge">0件</span></div>
+    <div id="frames" class="empty">護石を入力して検索してください。</div>
+  </section>
+
+  <section class="card">
+    <div class="titleline"><h2>前後10フレーム</h2><span id="aroundLabel" class="badge">未選択</span></div>
+    <div id="around" class="empty">検索結果のフレームをタップすると、前後10Fを表示します。</div>
+  </section>
+
+  <div class="notice">
+    iPhoneの「ファイル」アプリのQuick LookはJavaScriptを実行しない場合があります。その場合、このHTML自体は壊れていません。
+    Safariで使うにはWeb上に置くか、JavaScript対応のHTMLプレビューで開いてください。
+  </div>
+
+  <footer>
+    乱数生成・護石決定仕様（マカ/炭鉱の分岐を含む）は apmnnn/mhxx-rng の公開資料を基準に実装。
+    スキル名と風化したお守りの範囲は Kiranico MHXX の表記を使用。
+    このファイルは外部スクリプト・CDN・fetchを使わず、計算は端末内だけで行います。
+  </footer>
+</main>
+
+<dialog id="skillDialog">
+  <div class="dhead">
+    <div class="dheadrow"><input id="skillFilter" placeholder="スキル名を検索"><button id="closeSkills">閉じる</button></div>
+    <div class="hint">風化したお守りで第1または第2スキルになり得るものだけ表示しています。</div>
+  </div>
+  <div id="skillGrid" class="skillgrid"></div>
+</dialog>
+
+<script>
+"use strict";
+const SKILLS=[["毒",0,0,0],["麻痺",0,0,0],["睡眠",0,0,0],["気絶",0,0,0],["聴覚保護",3,7,5],["風圧",5,10,7],["耐震",0,0,0],["だるま",0,0,0],["耐暑",0,0,0],["耐寒",0,0,0],["寒冷適応",3,7,0],["炎熱適応",3,7,0],["盗み無効",0,0,0],["対防御DOWN",0,0,0],["狂撃耐性",3,7,0],["細菌学",5,10,0],["裂傷",0,0,0],["攻撃",0,0,10],["防御",0,0,13],["体力",0,0,0],["火耐性",0,0,0],["水耐性",0,0,0],["雷耐性",0,0,0],["氷耐性",0,0,0],["龍耐性",0,0,0],["属性耐性",3,7,7],["火属性攻撃",0,0,13],["水属性攻撃",0,0,13],["雷属性攻撃",0,0,13],["氷属性攻撃",0,0,13],["龍属性攻撃",0,0,13],["属性攻撃",3,7,0],["特殊攻撃",3,7,7],["研ぎ師",0,0,10],["匠",0,0,5],["斬れ味",3,7,7],["剣術",3,7,7],["研磨術",1,5,5],["鈍器",2,6,0],["抜刀会心",1,5,5],["抜刀減気",1,5,8],["納刀",5,10,7],["納刀研磨",5,10,0],["刃鱗",0,0,3],["装填速度",3,7,7],["反動",2,6,7],["精密射撃",0,0,0],["通常弾強化",2,6,5],["貫通弾強化",2,6,5],["散弾強化",2,6,5],["重撃弾強化",2,6,5],["通常弾追加",0,0,0],["貫通弾追加",0,0,0],["散弾追加",0,0,0],["榴弾追加",0,0,0],["拡散弾追加",0,0,0],["毒瓶追加",0,0,0],["麻痺瓶追加",0,0,0],["睡眠瓶追加",0,0,0],["強撃瓶追加",0,0,0],["属強瓶追加",0,0,0],["接撃瓶追加",0,0,0],["減気瓶追加",0,0,0],["爆破瓶追加",0,0,0],["速射",1,5,5],["射法",1,5,5],["装填数",1,5,5],["変則射撃",0,0,0],["弾薬節約",3,7,7],["達人",0,0,10],["痛撃",2,6,5],["連撃",1,5,3],["特殊会心",2,6,0],["属性会心",2,6,0],["会心強化",0,0,5],["裏会心",0,0,3],["溜め短縮",2,6,5],["スタミナ",2,6,5],["体術",3,7,5],["気力回復",3,7,5],["走行継続",2,6,5],["回避性能",2,6,5],["回避距離",2,6,5],["泡沫",1,5,3],["ガード性能",3,7,5],["ガード強化",3,7,5],["KO",5,10,10],["減気攻撃",5,10,10],["笛",0,0,10],["砲術",0,0,10],["重撃",2,6,5],["爆弾強化",0,0,10],["本気",2,6,5],["闘魂",1,5,3],["無傷",1,5,3],["チャンス",1,5,3],["龍気",0,0,3],["底力",2,6,5],["逆境",0,0,0],["逆上",2,6,5],["窮地",2,6,5],["根性",1,5,3],["気配",0,0,0],["采配",0,0,0],["号令",0,0,0],["乗り",0,0,10],["跳躍",2,6,5],["無心",1,5,3],["我慢",3,7,7],["SP延長",3,7,7],["千里眼",0,0,0],["観察眼",0,0,0],["狩人",0,0,0],["運搬",0,0,0],["加護",3,7,10],["英雄の盾",1,5,3],["回復量",3,7,5],["回復速度",0,0,0],["効果持続",0,0,0],["広域",0,0,12],["腹減り",0,0,0],["食いしん坊",0,0,0],["食事",2,6,5],["節食",3,7,7],["肉食",0,0,0],["茸食",0,0,5],["野草知識",0,0,0],["調合成功率",0,0,0],["調合数",0,0,0],["高速設置",0,0,0],["採取",0,0,0],["ハチミツ",0,0,0],["護石王",3,7,10],["気まぐれ",0,0,0],["運気",0,0,7],["剥ぎ取り",0,0,5],["捕獲",0,0,7],["ベルナ",0,0,0],["ココット",0,0,0],["ポッケ",0,0,0],["ユクモ",0,0,0],["龍識船",0,0,0],["飛行酒場",0,0,0],["紅兜",0,0,0],["大雪主",0,0,0],["矛砕",0,0,0],["岩穿",0,0,0],["紫毒姫",0,0,0],["宝纏",0,0,0],["白疾風",0,0,0],["隻眼",0,0,0],["黒炎王",0,0,0],["金雷公",0,0,0],["荒鉤爪",0,0,0],["燼滅刃",0,0,0],["朧隠",0,0,0],["鎧裂",0,0,0],["天眼",0,0,0],["青電主",0,0,0],["銀嶺",0,0,0],["鏖魔",0,0,0],["真・紅兜",0,0,3],["真・大雪主",0,0,3],["真・矛砕",0,0,3],["真・岩穿",0,0,3],["真・紫毒姫",0,0,3],["真・宝纏",0,0,3],["真・白疾風",0,0,3],["真・隻眼",0,0,3],["真・黒炎王",0,0,3],["真・金雷公",0,0,3],["真・荒鉤爪",0,0,3],["真・燼滅刃",0,0,3],["真・朧隠",0,0,3],["真・鎧裂",0,0,3],["真・天眼",0,0,3],["真・青電主",0,0,3],["真・銀嶺",0,0,3],["真・鏖魔",0,0,3]];
+const ALIASES={"聴覚":"聴覚保護","斬味":"斬れ味","研師":"研ぎ師","抜会":"抜刀会心","抜減":"抜刀減気","納研":"納刀研磨","装速":"装填速度","精密":"精密射撃","通強":"通常弾強化","貫強":"貫通弾強化","散強":"散弾強化","重強":"重撃弾強化","通追":"通常弾追加","貫追":"貫通弾追加","散追":"散弾追加","榴追":"榴弾追加","拡追":"拡散弾追加","毒追":"毒瓶追加","麻追":"麻痺瓶追加","睡追":"睡眠瓶追加","強追":"強撃瓶追加","属追":"属強瓶追加","接追":"接撃瓶追加","減追":"減気瓶追加","爆追":"爆破瓶追加","装数":"装填数","変則":"変則射撃","弾節":"弾薬節約","特会":"特殊会心","属会":"属性会心","会心":"会心強化","裏会":"裏会心","溜短":"溜め短縮","スタ":"スタミナ","気力":"気力回復","走行":"走行継続","回性":"回避性能","回距":"回避距離","ガ性":"ガード性能","ガ強":"ガード強化","ＫＯ":"KO","減攻":"減気攻撃","爆弾":"爆弾強化","チャ":"チャンス","ＳＰ":"SP延長","回量":"回復量","回速":"回復速度","護石":"護石王","剥取":"剥ぎ取り","貫通":"貫通弾強化","炎熱":"炎熱適応","火攻":"火属性攻撃","水攻":"水属性攻撃","雷攻":"雷属性攻撃","氷攻":"氷属性攻撃","龍攻":"龍属性攻撃","属攻":"属性攻撃","特攻":"特殊攻撃","攻":"攻撃","痛":"痛撃","連":"連撃","達":"達人","会":"会心強化","貫":"貫通弾強化","重":"重撃弾強化","炎":"炎熱適応","寒":"寒冷適応","火":"火属性攻撃","水":"水属性攻撃","雷":"雷属性攻撃","氷":"氷属性攻撃","龍":"龍属性攻撃","納":"納刀","爆":"爆弾強化","反":"反動","特":"特殊攻撃","溜":"溜め短縮","聴":"聴覚保護","砲":"砲術","底":"底力","逆":"逆上","英":"英雄の盾","装填":"装填数","減":"抜刀減気"};
+const SECOND_NEG={"聴覚保護":3,"風圧":5,"攻撃":7,"防御":5,"属性耐性":5,"火属性攻撃":5,"水属性攻撃":5,"雷属性攻撃":5,"氷属性攻撃":5,"龍属性攻撃":5,"特殊攻撃":5,"研ぎ師":7,"匠":3,"斬れ味":5,"剣術":5,"研磨術":3,"抜刀会心":5,"抜刀減気":2,"納刀":5,"刃鱗":3,"装填速度":5,"反動":5,"通常弾強化":3,"貫通弾強化":3,"散弾強化":3,"重撃弾強化":3,"速射":3,"射法":3,"装填数":3,"弾薬節約":5,"達人":7,"痛撃":3,"連撃":1,"会心強化":3,"裏会心":3,"溜め短縮":3,"スタミナ":3,"体術":3,"気力回復":3,"走行継続":3,"回避性能":3,"回避距離":3,"泡沫":1,"ガード性能":3,"ガード強化":3,"KO":7,"減気攻撃":7,"笛":5,"砲術":5,"重撃":3,"爆弾強化":5,"本気":3,"闘魂":1,"無傷":1,"チャンス":1,"龍気":3,"底力":3,"逆上":3,"窮地":3,"根性":1,"乗り":7,"跳躍":3,"無心":1,"我慢":5,"SP延長":5,"加護":7,"英雄の盾":1,"回復量":3,"広域":5,"食事":3,"節食":5,"茸食":3,"護石王":7,"運気":5,"剥ぎ取り":3,"捕獲":5,"真・紅兜":3,"真・大雪主":3,"真・矛砕":3,"真・岩穿":3,"真・紫毒姫":3,"真・宝纏":3,"真・白疾風":3,"真・隻眼":3,"真・黒炎王":3,"真・金雷公":3,"真・荒鉤爪":3,"真・燼滅刃":3,"真・朧隠":3,"真・鎧裂":3,"真・天眼":3,"真・青電主":3,"真・銀嶺":3,"真・鏖魔":3};
+const FIRST_IDS=SKILLS.map((x,i)=>x[2]>0?i:-1).filter(i=>i>=0);
+const SECOND_IDS=SKILLS.map((x,i)=>x[3]>0?i:-1).filter(i=>i>=0);
+const SLOT=[[0,0,0],[0,0,0],[3,53,88],[5,55,89],[7,57,89],[13,58,89],[16,60,90],[22,62,90],[30,66,90],[38,68,91],[50,72,91],[55,75,92],[59,77,92],[64,81,94],[67,83,94],[71,86,96],[74,88,96],[79,91,98],[82,92,98],[86,94,99],[90,96,99]];
+const SEED=[0x0194FD72,0x79E6C985,0x08DD9701,0x41CFCE91].map(x=>x>>>0);
+const $=id=>document.getElementById(id);
+const NAME_TO_ID=new Map(SKILLS.map((x,i)=>[norm(x[0]),i]));
+const ACTIVE_IDS=[...new Set([...FIRST_IDS,...SECOND_IDS])];
+const NEG2_BY_ID=SKILLS.map(x=>SECOND_NEG[x[0]]||0);
+let cancelled=false;
+let checkpoints=new Map([[0,SEED.slice()]]);
+let checkpointKeys=[0];
+
+function norm(s){return String(s??"").normalize("NFKC").replace(/[\s　]+/g,"").toUpperCase();}
+function nextState(s){
+  const a=s[0]>>>0,b=s[1]>>>0,c=s[2]>>>0,d=s[3]>>>0;
+  let x=(a ^ ((a<<15)>>>0))>>>0;
+  x=(x ^ (x>>>4))>>>0;
+  x=(x ^ d ^ (d>>>21))>>>0;
+  return [b,c,d,x];
+}
+function slotCount(fill,j){
+  fill=Math.max(2,Math.min(20,fill|0));
+  const t=SLOT[fill],a=t[0],b=t[1],c=t[2];
+  return j<a?0:j<b?1:j<c?2:3;
+}
+function charmFromRng(r,origin="maka"){
+  const id1=FIRST_IDS[(r[0]>>>0)%FIRST_IDS.length];
+  const s1=SKILLS[id1], mn1=s1[1], mx1=s1[2];
+  const v1=((r[1]>>>0)%(mx1-mn1+1))+mn1;
+
+  // 第2スキルなし: マカ/炭鉱とも4乱数目でスロット判定
+  if(((r[2]>>>0)%100)<15){
+    const fill=Math.floor(v1/mx1*10);
+    return {id1,v1,id2:-1,v2:0,rawId2:-1,rawV2:0,rawNegativeZero:false,slots:slotCount(fill,(r[3]>>>0)%100),fill};
+  }
+
+  const rawId2=SECOND_IDS[(r[3]>>>0)%SECOND_IDS.length];
+  const mx2=SKILLS[rawId2][3];
+  let rawV2,slotRnd;
+  let rawNegativeZero=false;
+
+  if(origin==="mine"){
+    // 通常クエスト: 第2スキルIDの次の乱数で正負を決定。
+    // 奇数=正、偶数=負。負側は -A..0 で、0は第2スキルなし扱い。
+    const positive=((r[4]>>>0)%2)===1;
+    if(positive){
+      rawV2=((r[5]>>>0)%mx2)+1;
+    }else{
+      const a=NEG2_BY_ID[rawId2];
+      rawV2=((r[5]>>>0)%(a+1))-a;
+      rawNegativeZero=rawV2===0;
+    }
+    slotRnd=r[6]>>>0;
+  }else{
+    // マカ錬金: 正負判定を行わず、第2スキル値は正のみ。
+    rawV2=((r[4]>>>0)%mx2)+1;
+    slotRnd=r[5]>>>0;
+  }
+
+  const duplicate=rawId2===id1;
+  const hidden=duplicate||rawNegativeZero;
+  const v2ForFill=(!hidden && rawV2>0)?rawV2:0;
+  const fill=Math.floor(v1/mx1*10 + v2ForFill/mx2*10);
+  return {
+    id1,v1,id2:hidden?-1:rawId2,v2:hidden?0:rawV2,
+    rawId2,rawV2,rawNegativeZero,slots:slotCount(fill,slotRnd%100),fill
+  };
+}
+function displayCharm(c){
+  const p1=`${SKILLS[c.id1][0]}${c.v1}`;
+  const p2=c.id2>=0?` ${SKILLS[c.id2][0]}${c.v2}`:"";
+  return `${p1}${p2} S${c.slots}`;
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function fmt(n){return Number(n).toLocaleString("ja-JP");}
+function setStatus(text,kind=""){$("status").className="status"+(kind?" "+kind:"");$("status").textContent=text;}
+function setProgress(p){$("progress").style.display="block";$("bar").style.width=`${Math.max(0,Math.min(100,p*100))}%`;}
+function hideProgress(){$("progress").style.display="none";$("bar").style.width="0%";}
+function yieldUI(){return new Promise(r=>setTimeout(r,0));}
+
+function addCheckpoint(frame,s){
+  if(checkpoints.has(frame))return;
+  checkpoints.set(frame,s.slice());
+  checkpointKeys.push(frame);
+  checkpointKeys.sort((a,b)=>a-b);
+}
+function nearestCheckpoint(frame){
+  let best=0;
+  for(const k of checkpointKeys){if(k<=frame)best=k;else break;}
+  return [best,checkpoints.get(best).slice()];
+}
+async function stateAt(frame,progressBase=0,progressSpan=0){
+  frame=Math.max(0,Math.floor(frame));
+  let [at,s]=nearestCheckpoint(frame);
+  let a=s[0]>>>0,b=s[1]>>>0,c=s[2]>>>0,d=s[3]>>>0;
+  const total=frame-at;
+  const block=250000;
+
+  // ホットループでは nextState() の配列生成を避け、4つの数値だけを更新する。
+  for(let i=0;i<total;i++){
+    let x=(a ^ ((a<<15)>>>0))>>>0;
+    x=(x ^ (x>>>4))>>>0;
+    x=(x ^ d ^ (d>>>21))>>>0;
+    a=b;b=c;c=d;d=x;
+    at++;
+
+    if(at%100000===0)addCheckpoint(at,[a,b,c,d]);
+    if(i>0 && i%block===0){
+      if(cancelled)throw new Error("CANCELLED");
+      if(progressSpan)setProgress(progressBase+progressSpan*(i/Math.max(1,total)));
+      await yieldUI();
+    }
+  }
+  if(cancelled)throw new Error("CANCELLED");
+  s=[a,b,c,d];
+  addCheckpoint(frame,s);
+  return s;
+}
+
+const aliasEntries=Object.entries(ALIASES).map(([a,n])=>[norm(a),n]);
+const nameEntries=ACTIVE_IDS.map(id=>[norm(SKILLS[id][0]),SKILLS[id][0]]);
+const PARSE_NAMES=[...nameEntries,...aliasEntries]
+  .sort((a,b)=>b[0].length-a[0].length);
+
+// 短縮入力: 「痛撃達人6103」→ 痛撃6 / 達人10 / S3
+// 末尾1桁をスロット数、直前の数字列を第1・第2スキル値に分割し、
+// 実際に取り得る値の範囲から一意に決定する。
+function parseCompactShorthand(text){
+  const compact=norm(String(text??"").replace(/[、,\/|・]/g,""));
+  if(!compact)return null;
+  const candidates=[];
+
+  function addCandidate(id1,v1,id2,v2,slots){
+    if(!FIRST_IDS.includes(id1))return;
+    if(v1<SKILLS[id1][1]||v1>SKILLS[id1][2])return;
+    if(id2>=0){
+      if(!SECOND_IDS.includes(id2))return;
+      if(v2<1||v2>SKILLS[id2][3])return;
+    }
+    const key=`${id1}:${v1}:${id2}:${v2}:${slots}`;
+    if(!candidates.some(x=>x.key===key))candidates.push({key,id1,v1,id2,v2,slots});
+  }
+
+  for(const [key1,canonical1] of PARSE_NAMES){
+    if(!compact.startsWith(key1))continue;
+    const id1=NAME_TO_ID.get(norm(canonical1));
+    if(id1===undefined)continue;
+    const rest1=compact.slice(key1.length);
+
+    // 2スキル短縮: スキル名 + スキル名 + 数値1 + 数値2 + S
+    for(const [key2,canonical2] of PARSE_NAMES){
+      if(!rest1.startsWith(key2))continue;
+      const id2=NAME_TO_ID.get(norm(canonical2));
+      if(id2===undefined)continue;
+      const digits=rest1.slice(key2.length);
+      if(!/^\d{3,5}$/.test(digits))continue;
+      const slots=Number(digits.slice(-1));
+      if(slots<0||slots>3)continue;
+      const values=digits.slice(0,-1);
+      for(let cut=1;cut<values.length;cut++){
+        const v1=Number(values.slice(0,cut));
+        const v2=Number(values.slice(cut));
+        addCandidate(id1,v1,id2,v2,slots);
+      }
+    }
+
+    // 1スキル短縮: 「痛撃63」→ 痛撃6 / S3
+    if(/^\d{2,3}$/.test(rest1)){
+      const slots=Number(rest1.slice(-1));
+      const v1=Number(rest1.slice(0,-1));
+      if(slots>=0&&slots<=3)addCandidate(id1,v1,-1,0,slots);
+    }
+  }
+
+  if(candidates.length===1){
+    const {id1,v1,id2,v2,slots}=candidates[0];
+    return {id1,v1,id2,v2,slots};
+  }
+  if(candidates.length>1){
+    throw new Error("短縮入力の数値の区切りが複数通りあります。例: 痛撃6 達人10 S3 の形で入力してください。");
+  }
+  return null;
+}
+
+function parseQuery(raw){
+  let text=String(raw??"").normalize("NFKC").trim();
+  if(!text)throw new Error("護石を入力してください。例: 連撃4 痛撃5 S3");
+
+  let start=Math.max(0,Math.floor(Number($("startF").value)||0));
+  let end=Math.max(start,Math.floor(Number($("endF").value)||50000000));
+  let mode=$("mode").value;
+  let origin=$("origin").value;
+
+  const range=text.match(/@\s*([0-9,]+)\s*[-~〜]\s*([0-9,]+)/);
+  if(range){
+    start=Number(range[1].replace(/,/g,""));
+    end=Number(range[2].replace(/,/g,""));
+    if(!Number.isFinite(start)||!Number.isFinite(end)||end<start)throw new Error("検索範囲は @開始F-終了F の形で入力してください。");
+    text=text.replace(range[0]," ");
+  }
+  if(/以上/.test(text)){mode="greater";text=text.replace(/以上/g," ");}
+  text=text.replace(/(?:風化(?:した)?(?:お守り)?|マカ(?:錬金)?)/g," ");
+
+  const sm=text.match(/(?:S|スロ(?:ット)?)\s*([0-3])/i);
+  if(!sm){
+    const short=parseCompactShorthand(text);
+    if(short){
+      if(end-start+1>100000000)throw new Error("1回の検索範囲は1億F以下にしてください。");
+      return {...short,start,end,mode,origin};
+    }
+    throw new Error("スロット数を S0〜S3 で入力するか、痛撃達人6103 のような短縮形式で入力してください。");
+  }
+  const slots=Number(sm[1]);
+  text=text.replace(sm[0]," ");
+
+  let compact=norm(text.replace(/[、,\/|・]/g,""));
+  const found=[];
+  while(compact){
+    let hit=null;
+    for(const [key,canonical] of PARSE_NAMES){
+      if(!compact.startsWith(key))continue;
+      const rest=compact.slice(key.length);
+      const m=rest.match(/^([+-]?\d+)/);
+      if(!m)continue;
+      const id=NAME_TO_ID.get(norm(canonical));
+      if(id===undefined)continue;
+      hit={id,value:Number(m[1]),len:key.length+m[1].length};
+      break;
+    }
+    if(!hit)throw new Error("この部分を解釈できません: "+compact.slice(0,18));
+    found.push(hit);compact=compact.slice(hit.len);
+  }
+  if(found.length<1||found.length>2)throw new Error("スキルは1個または2個入力してください。");
+
+  const [a,b]=found;
+  if(!FIRST_IDS.includes(a.id))throw new Error(`${SKILLS[a.id][0]} は風化したお守りの第1スキルには付きません。`);
+  if(a.value<SKILLS[a.id][1]||a.value>SKILLS[a.id][2])throw new Error(`${SKILLS[a.id][0]}の第1スキル範囲は ${SKILLS[a.id][1]}〜${SKILLS[a.id][2]} です。`);
+  if(b){
+    if(!SECOND_IDS.includes(b.id))throw new Error(`${SKILLS[b.id][0]} は風化したお守りの第2スキルには付きません。`);
+    const mx=SKILLS[b.id][3];
+    if(origin==="mine"){
+      const aNeg=NEG2_BY_ID[b.id];
+      if(b.value===0||b.value<(-aNeg)||b.value>mx)throw new Error(`${SKILLS[b.id][0]}の炭鉱・第2スキル範囲は -${aNeg}〜-1 または 1〜${mx} です。`);
+    }else if(b.value<1||b.value>mx){
+      throw new Error(`${SKILLS[b.id][0]}のマカ錬金・第2スキル範囲は 1〜${mx} です。`);
+    }
+  }
+  if(end-start+1>100000000)throw new Error("1回の検索範囲は1億F以下にしてください。");
+  return {id1:a.id,v1:a.value,id2:b?b.id:-1,v2:b?b.value:0,slots,start,end,mode,origin};
+}
+
+function matches(c,q){
+  if(c.id1!==q.id1)return false;
+  if(q.mode==="greater"){
+    if(c.v1<q.v1)return false;
+    if(q.id2>=0){
+      if(c.id2!==q.id2||c.v2<q.v2)return false;
+    } else if(c.id2>=0) return false;
+    return c.slots>=q.slots;
+  }
+  return c.v1===q.v1 && c.id2===q.id2 && c.v2===q.v2 && c.slots===q.slots;
+}
+
+async function searchFrames(q){
+  cancelled=false;
+  $("cancel").style.display="";
+  $("search").disabled=true;
+  $("frames").className="empty";$("frames").textContent="検索中…";
+  $("count").textContent="0件";
+  $("around").className="empty";$("around").textContent="検索結果のフレームをタップすると、前後10Fを表示します。";
+  $("aroundLabel").textContent="未選択";
+  setProgress(0);
+
+  const prepSpan=q.start>0?0.18:0;
+  setStatus(q.start>0?`${fmt(q.start)}Fまで乱数を進めています…`:"検索中…");
+  const initial=await stateAt(q.start,0,prepSpan);
+
+  // 検索条件はループ外で固定値に展開。毎Fのオブジェクト参照・分岐を減らす。
+  const qId1=q.id1, qV1=q.v1, qId2=q.id2, qV2=q.v2, qSlots=q.slots;
+  const greater=q.mode==="greater", isMine=q.origin==="mine";
+  const firstLen=FIRST_IDS.length, secondLen=SECOND_IDS.length;
+  const s1=SKILLS[qId1], mn1=s1[1], mx1=s1[2], range1=mx1-mn1+1;
+  const qMx2=qId2>=0?SKILLS[qId2][3]:0;
+  const qNeg2=qId2>=0?NEG2_BY_ID[qId2]:0;
+
+  // 現在状態と+6F側の状態をスカラ値で保持。
+  // r0..r6 も固定変数にし、毎Fの Array.shift()/push() をなくす。
+  let a=initial[0]>>>0,b=initial[1]>>>0,c=initial[2]>>>0,d=initial[3]>>>0;
+  let fa=a,fb=b,fc=c,fd=d;
+  let r0=d,r1=0,r2=0,r3=0,r4=0,r5=0,r6=0;
+  for(let i=1;i<=6;i++){
+    let x=(fa ^ ((fa<<15)>>>0))>>>0;
+    x=(x ^ (x>>>4))>>>0;
+    x=(x ^ fd ^ (fd>>>21))>>>0;
+    fa=fb;fb=fc;fc=fd;fd=x;
+    if(i===1)r1=x;else if(i===2)r2=x;else if(i===3)r3=x;
+    else if(i===4)r4=x;else if(i===5)r5=x;else r6=x;
+  }
+
+  const results=[];
+  const total=q.end-q.start+1;
+  const block=250000;
+  let f=q.start;
+
+  for(let idx=0;idx<total;idx++,f++){
+    // 第1スキル → 値 → 第2スキル → スロットの順で早期除外する。
+    if(FIRST_IDS[r0%firstLen]===qId1){
+      const v1=(r1%range1)+mn1;
+      if(greater?v1>=qV1:v1===qV1){
+        let hit=false;
+        const hasSecond=(r2%100)>=15;
+        const fill1=Math.floor(v1/mx1*10);
+
+        if(qId2>=0){
+          // 第2スキルを指定している検索。
+          if(hasSecond){
+            const rawId2=SECOND_IDS[r3%secondLen];
+            // 同一スキルはゲーム上消去されるので、指定第2スキルとしては一致しない。
+            if(rawId2===qId2 && rawId2!==qId1){
+              let v2,slotRnd;
+              if(isMine){
+                if((r4&1)===1)v2=(r5%qMx2)+1;
+                else v2=(r5%(qNeg2+1))-qNeg2;
+                slotRnd=r6;
+              }else{
+                v2=(r4%qMx2)+1;
+                slotRnd=r5;
+              }
+
+              // 炭鉱の負側0は「第2スキルなし」扱い。
+              if(v2!==0 && (greater?v2>=qV2:v2===qV2)){
+                const fill=Math.floor(v1/mx1*10 + (v2>0?v2/qMx2*10:0));
+                const slots=slotCount(fill,slotRnd%100);
+                hit=greater?slots>=qSlots:slots===qSlots;
+              }
+            }
+          }
+        }else{
+          // 第2スキルなしを指定している検索。
+          if(!hasSecond){
+            const slots=slotCount(fill1,r3%100);
+            hit=greater?slots>=qSlots:slots===qSlots;
+          }else{
+            const rawId2=SECOND_IDS[r3%secondLen];
+            if(rawId2===qId1){
+              // 同一スキル抽選は表示上消去。乱数消費位置だけ生成方式で異なる。
+              const slots=slotCount(fill1,(isMine?r6:r5)%100);
+              hit=greater?slots>=qSlots:slots===qSlots;
+            }else if(isMine && (r4&1)===0){
+              // 炭鉱で負側0を引いた場合も表示上は第2スキルなし。
+              const neg=NEG2_BY_ID[rawId2];
+              const rawV2=(r5%(neg+1))-neg;
+              if(rawV2===0){
+                const slots=slotCount(fill1,r6%100);
+                hit=greater?slots>=qSlots:slots===qSlots;
+              }
+            }
+          }
+        }
+
+        if(hit){
+          results.push(f);
+          if(results.length>=500)break;
+        }
+      }
+    }
+
+    // 現在状態を1F進める。次状態のdは既にr1にある。
+    a=b;b=c;c=d;d=r1;
+
+    // +6F側も1F進めて、新しいr6を1個だけ生成する。
+    let x=(fa ^ ((fa<<15)>>>0))>>>0;
+    x=(x ^ (x>>>4))>>>0;
+    x=(x ^ fd ^ (fd>>>21))>>>0;
+    fa=fb;fb=fc;fc=fd;fd=x;
+
+    r0=r1;r1=r2;r2=r3;r3=r4;r4=r5;r5=r6;r6=x;
+
+    const nf=f+1;
+    if(nf%100000===0)addCheckpoint(nf,[a,b,c,d]);
+
+    if(idx>0&&idx%block===0){
+      if(cancelled)throw new Error("CANCELLED");
+      const p=prepSpan+(1-prepSpan)*(idx/Math.max(1,total));
+      setProgress(p);
+      setStatus(`${originLabel(q.origin)}で検索中… ${fmt(f)}F / ${fmt(q.end)}F`);
+      await yieldUI();
+    }
+  }
+  if(cancelled)throw new Error("CANCELLED");
+  setProgress(1);
+  return results;
+}
+
+async function doSearch(){
+  let q;
+  try{q=parseQuery($("query").value);}
+  catch(e){setStatus(e.message||String(e),"err");return;}
+
+  $("startF").value=q.start;$("endF").value=q.end;$("mode").value=q.mode;$("origin").value=q.origin;
+  try{
+    const results=await searchFrames(q);
+    renderFrames(results,q.origin);
+    if(results.length>=500)setStatus("500件で表示を打ち切りました。検索範囲や条件を絞ってください。","warn");
+    else setStatus(`${originLabel(q.origin)}で検索完了: ${results.length}件見つかりました。フレームをタップすると前後10Fを表示します。`,"ok");
+  }catch(e){
+    if(e.message==="CANCELLED")setStatus("検索を中止しました。","warn");
+    else setStatus("検索エラー: "+(e.message||e),"err");
+  }finally{
+    $("search").disabled=false;$("cancel").style.display="none";
+    setTimeout(hideProgress,350);
+  }
+}
+
+function originLabel(origin){return origin==="mine"?"炭鉱（通常クエスト）":"マカ錬金";}
+
+function renderFrames(frames,origin){
+  $("count").textContent=`${frames.length}件`;
+  const box=$("frames");box.innerHTML="";
+  if(!frames.length){box.className="empty";box.textContent="該当フレームは見つかりませんでした。";return;}
+  box.className="frames";
+  for(const f of frames){
+    const b=document.createElement("button");b.className="frame";b.textContent=`${fmt(f)} F`;
+    b.addEventListener("click",()=>showAround(f,b,origin));box.appendChild(b);
+  }
+}
+
+async function charmAt(frame,origin="maka"){
+  const s=await stateAt(frame);
+  let t=s.slice(),r=[t[3]>>>0];
+  for(let i=1;i<7;i++){t=nextState(t);r.push(t[3]>>>0);}
+  return charmFromRng(r,origin);
+}
+async function showAround(frame,btn,origin){
+  document.querySelectorAll(".frame.active").forEach(x=>x.classList.remove("active"));btn?.classList.add("active");
+  $("aroundLabel").textContent=`${fmt(frame)} F / ${originLabel(origin)}`;
+  const box=$("around");box.className="empty";box.textContent="前後10Fを計算中…";
+  try{
+    const lo=Math.max(0,frame-10),hi=frame+10;
+    let s=await stateAt(lo);
+    let future=s.slice(),r=[s[3]>>>0];
+    for(let i=1;i<7;i++){future=nextState(future);r.push(future[3]>>>0);}
+
+    let rows="";
+    for(let f=lo;f<=hi;f++){
+      const c=charmFromRng(r,origin);
+      let note="";
+      if(c.rawId2===c.id1 && c.rawId2>=0) note=`<span class="subnote">内部抽選は ${esc(SKILLS[c.rawId2][0])}${c.rawV2}（同一スキルのためゲーム上は消去）</span>`;
+      else if(c.rawNegativeZero) note=`<span class="subnote">内部抽選は ${esc(SKILLS[c.rawId2][0])}0（負側0のためゲーム上は消去）</span>`;
+      rows+=`<tr class="${f===frame?"center":""}"><td>${fmt(f)} F</td><td><span class="charm">${esc(displayCharm(c))}</span>${note}</td><td>${c.fill}</td></tr>`;
+      if(f<hi){
+        s=[s[1]>>>0,s[2]>>>0,s[3]>>>0,r[1]>>>0];
+        future=nextState(future);r.shift();r.push(future[3]>>>0);
+      }
+    }
+    box.className="tablewrap";
+    box.innerHTML=`<table><thead><tr><th>フレーム</th><th>護石</th><th>充足値</th></tr></thead><tbody>${rows}</tbody></table>`;
+    box.querySelector("tr.center")?.scrollIntoView({block:"nearest"});
+  }catch(e){
+    box.className="empty";box.textContent="表示エラー: "+(e.message||e);
+  }
+}
+
+function renderSkillList(filter=""){
+  const g=$("skillGrid");g.innerHTML="";const q=norm(filter);
+  for(const id of ACTIVE_IDS){
+    const n=SKILLS[id][0];if(q&&!norm(n).includes(q))continue;
+    const b=document.createElement("button");b.textContent=n;
+    b.addEventListener("click",()=>{const cur=$("query").value.trim();$("query").value=(cur?cur+" ":"")+n;$("skillDialog").close();$("query").focus();});
+    g.appendChild(b);
+  }
+}
+
+async function selfTest(){
+  const tests=[
+    [296260,"痛撃達人6103","痛撃6 達人10 S3"],
+    [2359514,"貫通達人5103","貫通弾強化5 達人10 S3"],
+    [7158398,"納刀反動1073","納刀10 反動7 S3"],
+    [7638553,"炎熱会心753","炎熱適応7 会心強化5 S3"],
+    [9673507,"連撃攻撃5103","連撃5 攻撃10 S3"]
+  ];
+  for(const [f,input,expected] of tests){
+    const short=parseCompactShorthand(input);
+    if(!short || displayCharm(short)!==expected){
+      throw new Error(`短縮入力テスト失敗: ${input}`);
+    }
+    const c=await charmAt(f,"maka");
+    if(displayCharm(c)!==expected)throw new Error(`${f}F: ${displayCharm(c)} / expected ${expected}`);
+  }
+  for(const id of SECOND_IDS){
+    if(!(NEG2_BY_ID[id]>0))throw new Error(`炭鉱の第2スキル負下限が未設定: ${SKILLS[id][0]}`);
+  }
+  // 炭鉱では第2スキルが付く場合、マカと異なる乱数位置をスロット判定に使うことを確認。
+  const maka=await charmAt(296260,"maka"), mine=await charmAt(296260,"mine");
+  if(displayCharm(maka)===displayCharm(mine))throw new Error("生成方式切替テスト失敗: マカ/炭鉱の結果が同一です。");
+  return true;
+}
+
+$("search").addEventListener("click",doSearch);
+$("query").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();doSearch();}});
+$("cancel").addEventListener("click",()=>{cancelled=true;});
+document.querySelectorAll("[data-q]").forEach(b=>b.addEventListener("click",()=>{$("origin").value="maka";$("query").value=b.dataset.q;doSearch();}));
+$("skillsBtn").addEventListener("click",()=>{$("skillFilter").value="";renderSkillList();$("skillDialog").showModal();});
+$("closeSkills").addEventListener("click",()=>$("skillDialog").close());
+$("skillFilter").addEventListener("input",e=>renderSkillList(e.target.value));
+renderSkillList();
+
+window.addEventListener("error",e=>setStatus("JavaScriptエラー: "+e.message,"err"));
+(async()=>{
+  try{await selfTest();setStatus("準備完了。マカ既知5件＋炭鉱生成方式を照合済みです。","ok");}
+  catch(e){setStatus("自己テスト失敗: "+(e.message||e),"err");$("search").disabled=true;}
+})();
+</script>
+</body>
+</html>
